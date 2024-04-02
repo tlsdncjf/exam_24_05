@@ -6,11 +6,13 @@ import {
   Button,
   AppBar,
   Toolbar,
-  Backdrop,
-  CircularProgress,
+  Drawer,
+  List,
+  ListItemButton,
 } from "@mui/material";
 import theme from "./theme";
 import { FaBars } from "react-icons/fa";
+import Link from "next/link";
 
 export default function App() {
   const [open, setOpen] = React.useState(false);
@@ -21,7 +23,10 @@ export default function App() {
         <AppBar position="fixed">
           <Toolbar>
             <div className="tw-flex-1">
-              <FaBars className="tw-cursor-pointer" />
+              <FaBars
+                onClick={() => setOpen(true)}
+                className="tw-cursor-pointer"
+              />
             </div>
             <div className="logo-box">
               <a href="/" className="tw-font-bold">
@@ -38,14 +43,16 @@ export default function App() {
           section
         </section>
       </ThemeProvider>
-      <Button onClick={() => setOpen(true)}>Show backdrop</Button>
-      <Backdrop
-        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={open}
-        onClick={() => setOpen(false)}
-      >
-        <CircularProgress color="inherit" />
-      </Backdrop>
+      <Button onClick={() => setOpen(true)}>show drawer</Button>
+      <Drawer anchor="left" open={open} onClose={() => setOpen(false)}>
+        <List>
+          <ListItemButton>
+            <Link href="/write">글 쓰기</Link>
+          </ListItemButton>
+          <ListItemButton>사과</ListItemButton>
+          <ListItemButton>바나나</ListItemButton>
+        </List>
+      </Drawer>
     </>
   );
 }
