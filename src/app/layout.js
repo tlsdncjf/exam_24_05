@@ -8,12 +8,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="ko">
-      {" "}
       <body>
         {children}
         {/* <section>lorem*20</section> */}
       </body>
-      <body>{children}</body>
     </html>
   );
 }
