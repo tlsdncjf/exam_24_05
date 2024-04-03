@@ -169,7 +169,9 @@ const App = () => {
   const todosState = useTodoStatus(); // 리액트 커스텀 훅
 
   React.useEffect(() => {
-    todosState.addTodo("스쿼트");
+    todosState.addTodo(
+      "스쿼트스쿼트스쿼트스쿼트스쿼트스쿼트스쿼트스쿼트스쿼트스쿼트스쿼트스쿼트스쿼트스쿼트스쿼트스쿼트스쿼트스쿼트스쿼트스쿼트스쿼트스쿼트스쿼트스쿼트스쿼트스쿼트"
+    );
     // todosState.addTodo('벤치');
     // todosState.addTodo('데드');
   }, []);
@@ -201,6 +203,7 @@ const App = () => {
               onClick={() => setOpen(true)}
               className="tw-cursor-pointer"
             />
+            rounded
           </div>
           <div className="logo-box">
             <a href="/" className="tw-font-bold">
@@ -235,11 +238,9 @@ const App = () => {
                   label={`날짜 : ${todo.regDate}`}
                   variant="outlined"
                 ></Chip>
-                <Chip
-                  label={`할 일 : ${todo.content}`}
-                  variant="outlined"
-                  color="primary"
-                ></Chip>
+                <div className="tw-p-10 tw-rounded-[20px] tw-shadow tw-whitespace-pre-wrap tw-leading-relaxed">
+                  할 일 : {todo.content}
+                </div>
               </div>
             </li>
           ))}
