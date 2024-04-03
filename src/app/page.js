@@ -9,6 +9,7 @@ import {
   CssBaseline,
   TextField,
   Chip,
+  Box,
 } from "@mui/material";
 import { FaBars } from "react-icons/fa";
 import theme from "./theme";
@@ -201,7 +202,6 @@ function App() {
               onClick={() => setOpen(true)}
               className="tw-cursor-pointer"
             />
-            rounded
           </div>
           <div className="logo-box">
             <a href="/" className="tw-font-bold">
@@ -235,16 +235,18 @@ function App() {
             <li key={todo.id}>
               <div className="tw-flex tw-flex-col tw-gap-2 tw-mt-[30px]">
                 <Chip
+                  className="tw-pt-3"
                   label={`번호 : ${todo.id}`}
                   variant="outlined"
-                  color="secondary"
+                  color="primary"
                 ></Chip>
                 <Chip
+                  className="tw-pt-3"
                   label={`날짜 : ${todo.regDate}`}
                   variant="outlined"
                 ></Chip>
                 <div className="tw-p-10 tw-rounded-[20px] tw-shadow tw-whitespace-pre-wrap tw-leading-relaxed tw-break-words">
-                  할 일 : {todo.content}
+                  <Box sx={{ color: "primary.main" }}>{todo.content}</Box>
                 </div>
               </div>
             </li>
