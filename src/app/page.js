@@ -74,7 +74,10 @@ const NewTodoForm = ({ todosState }) => {
 
   return (
     <>
-      <form onSubmit={(e) => onSubmit(e)}>
+      <form
+        onSubmit={(e) => onSubmit(e)}
+        className="tw-flex tw-flex-col tw-p-4 tw-gap-2"
+      >
         <TextField
           minRows={3}
           maxRows={10}
@@ -91,7 +94,7 @@ const NewTodoForm = ({ todosState }) => {
   );
 };
 
-const TodoListItem = ({ todo, index }) => {
+const TodoListItem = ({ todo, index, setOptionDrawerTodoId }) => {
   return (
     <>
       <li key={todo.id}>
@@ -129,6 +132,9 @@ const TodoListItem = ({ todo, index }) => {
               {todo.content}
             </div>
             <Button
+              onClick={() => {
+                setOptionDrawerTodoId(todo.id);
+              }}
               className="tw-flex-shrink-0 tw-rounded-[0_10px_10px_0]"
               color="inherit"
             >
@@ -142,10 +148,18 @@ const TodoListItem = ({ todo, index }) => {
 };
 
 const TodoList = ({ todosState }) => {
+  const [optionDrawerTodoId, setOptionDrawerTodoId] = React.useState(null);
   return (
     <>
-      <Drawer anchor="{bottom}" open={false} onClose={() => {}}>
+      <Drawer
+        anchor="bottom"
+        open={optionDrawerTodoId !== null}
+        onClose={() => {
+          setOptionDrawerTodoId(null);
+        }}
+      >
         <div className="tw-p-[30px] tw-flex tw-gap-x-[5px]">
+          {optionDrawerTodoId}번 todo에 대한 옵션 Drawer
           <div>수정</div>
           <div>삭제</div>
         </div>
@@ -154,7 +168,12 @@ const TodoList = ({ todosState }) => {
       <nav>
         <ul>
           {todosState.todos.map((todo, index) => (
-            <TodoListItem key={todo.id} todo={todo} index={index} />
+            <TodoListItem
+              key={todo.id}
+              todo={todo}
+              index={index}
+              setOptionDrawerTodoId={setOptionDrawerTodoId}
+            />
           ))}
         </ul>
       </nav>
@@ -163,7 +182,7 @@ const TodoList = ({ todosState }) => {
 };
 
 function App() {
-  const todosState = useTodosState(); // 리액트 커스텀 훅
+  const todosState = useTodosState();
 
   React.useEffect(() => {
     todosState.addTodo("스쿼트\n런지");
