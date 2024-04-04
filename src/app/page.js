@@ -94,7 +94,7 @@ const NewTodoForm = ({ todosState }) => {
   );
 };
 
-const TodoListItem = ({ todo, index, setOptionDrawerTodoId }) => {
+const TodoListItem = ({ todo, index, openDrawer }) => {
   return (
     <>
       <li key={todo.id}>
@@ -133,7 +133,7 @@ const TodoListItem = ({ todo, index, setOptionDrawerTodoId }) => {
             </div>
             <Button
               onClick={() => {
-                setOptionDrawerTodoId(todo.id);
+                openDrawer(todo.id);
               }}
               className="tw-flex-shrink-0 tw-rounded-[0_10px_10px_0]"
               color="inherit"
@@ -149,15 +149,18 @@ const TodoListItem = ({ todo, index, setOptionDrawerTodoId }) => {
 
 const TodoList = ({ todosState }) => {
   const [optionDrawerTodoId, setOptionDrawerTodoId] = React.useState(null);
+
+  const drawerOpened = React.useMemo(
+    () => optionDrawerTodoId !== null,
+    [optionDrawerTodoId]
+  );
+
+  const openDrawer = (id) => setOptionDrawerTodoId(id);
+  const closeDrawer = () => setOptionDrawerTodoId(null);
+
   return (
     <>
-      <Drawer
-        anchor="bottom"
-        open={optionDrawerTodoId !== null}
-        onClose={() => {
-          setOptionDrawerTodoId(null);
-        }}
-      >
+      <Drawer anchor="bottom" open={drawerOpened} onClose={closeDrawer}>
         <div className="tw-p-[30px] tw-flex tw-gap-x-[5px]">
           {optionDrawerTodoId}번 todo에 대한 옵션 Drawer
           <div>수정</div>
@@ -172,7 +175,7 @@ const TodoList = ({ todosState }) => {
               key={todo.id}
               todo={todo}
               index={index}
-              setOptionDrawerTodoId={setOptionDrawerTodoId}
+              openDrawer={openDrawer}
             />
           ))}
         </ul>
