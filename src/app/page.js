@@ -99,7 +99,7 @@ function useTodosStatus() {
   };
 }
 
-const NewTodoForm = ({ todosState, noticeSnackbarState }) => {
+const NewTodoForm = ({ todosStatus, noticeSnackbarStatus }) => {
   const onSubmit = (e) => {
     e.preventDefault();
 
@@ -113,10 +113,10 @@ const NewTodoForm = ({ todosState, noticeSnackbarState }) => {
       return;
     }
 
-    const newTodoId = todosState.addTodo(form.content.value);
+    const newTodoId = todosStatus.addTodo(form.content.value);
     form.content.value = "";
     form.content.focus();
-    noticeSnackbarState.open(`${newTodoId}번 todo 추가됨`);
+    noticeSnackbarStatus.open(`${newTodoId}번 todo 추가됨`);
   };
 
   return (
@@ -141,7 +141,7 @@ const NewTodoForm = ({ todosState, noticeSnackbarState }) => {
   );
 };
 
-const TodoListItem = ({ todo, index, openDrawer, todosState }) => {
+const TodoListItem = ({ todo, index, openDrawer, todosStatus }) => {
   return (
     <>
       <li key={todo.id}>
@@ -230,7 +230,7 @@ function useEditTodoModalStatus() {
   };
 }
 
-function EditTodoModal({ status, todosState, todo, noticeSnackbarState }) {
+function EditTodoModal({ status, todosStatus, todo, noticeSnackbarStatus }) {
   const onSubmit = (e) => {
     e.preventDefault();
 
@@ -245,13 +245,13 @@ function EditTodoModal({ status, todosState, todo, noticeSnackbarState }) {
     }
 
     // modify v1
-    todosState.modifyTodo(todo.id, form.content.value);
+    todosStatus.modifyTodo(todo.id, form.content.value);
     status.close();
 
-    noticeSnackbarState.open(`${todo.id}번 todo 수정됨`);
+    noticeSnackbarStatus.open(`${todo.id}번 todo 수정됨`);
 
     // modify v2
-    // todosState.modifyTodoById(todo.id, form.content.value);
+    // todosStatus.modifyTodoById(todo.id, form.content.value);
   };
 
   return (
@@ -283,32 +283,32 @@ function EditTodoModal({ status, todosState, todo, noticeSnackbarState }) {
   );
 }
 
-function TodoOptionDrawer({ status, todosState, noticeSnackbarState }) {
+function TodoOptionDrawer({ status, todosStatus, noticeSnackbarStatus }) {
   const removeTodo = () => {
     if (confirm(`${status.todoId}번 할 일을 삭제하시겠습니까?`) == false) {
       status.close();
       return;
     }
 
-    todosState.removeTodo(status.todoId);
+    todosStatus.removeTodo(status.todoId);
     status.close();
-    noticeSnackbarState.open(`${status.todoId}번 todo 삭제됨`, "error");
+    noticeSnackbarStatus.open(`${status.todoId}번 todo 삭제됨`, "error");
   };
 
   const editTodoModalStatus = useEditTodoModalStatus();
 
-  const todo = todosState.findTodoById(status.todoId);
+  const todo = todosStatus.findTodoById(status.todoId);
 
   return (
     <>
       <EditTodoModal
         status={editTodoModalStatus}
-        todosState={todosState}
+        todosStatus={todosStatus}
         todo={todo}
-        noticeSnackbarState={noticeSnackbarState}
+        noticeSnackbarStatus={noticeSnackbarStatus}
       />
       <SwipeableDrawer
-        anchor="top"
+        anchor="bottom"
         open={status.opened}
         onClose={status.close}
         onOpen={() => {}}
@@ -341,26 +341,26 @@ function TodoOptionDrawer({ status, todosState, noticeSnackbarState }) {
   );
 }
 
-const TodoList = ({ todosState, noticeSnackbarState }) => {
+const TodoList = ({ todosStatus, noticeSnackbarStatus }) => {
   const todoOptionDrawerStatus = useTodoOptionDrawerStatus();
 
   return (
     <>
       <TodoOptionDrawer
         status={todoOptionDrawerStatus}
-        todosState={todosState}
-        noticeSnackbarState={noticeSnackbarState}
+        todosStatus={todosStatus}
+        noticeSnackbarStatus={noticeSnackbarStatus}
       />
       <nav>
-        할 일 갯수 : {todosState.todos.length}
+        할 일 갯수 : {todosStatus.todos.length}
         <ul>
-          {todosState.todos.map((todo, index) => (
+          {todosStatus.todos.map((todo, index) => (
             <TodoListItem
               key={todo.id}
               todo={todo}
               index={index}
               openDrawer={todoOptionDrawerStatus.open}
-              todosState={todosState}
+              todosStatus={todosStatus}
             />
           ))}
         </ul>
@@ -421,18 +421,18 @@ function useNoticeSnackbarStatus() {
 }
 
 function App() {
-  const todosState = useTodosStatus();
-  const noticeSnackbarState = useNoticeSnackbarStatus();
+  const todosStatus = useTodosStatus();
+  const noticeSnackbarStatus = useNoticeSnackbarStatus();
 
   React.useEffect(() => {
-    todosState.addTodo("스쿼트\n런지");
-    todosState.addTodo("벤치");
-    todosState.addTodo("데드");
+    todosStatus.addTodo("스쿼트\n런지");
+    todosStatus.addTodo("벤치");
+    todosStatus.addTodo("데드");
   }, []);
 
   return (
     <>
-      <AppBar position="fixed" onClick={() => noticeSnackbarState.open("abc")}>
+      <AppBar position="fixed">
         <Toolbar>
           <div className="tw-flex-1">
             <FaBars
@@ -451,14 +451,14 @@ function App() {
         </Toolbar>
       </AppBar>
       <Toolbar />
-      <NoticeSnackbar status={noticeSnackbarState} />
+      <NoticeSnackbar status={noticeSnackbarStatus} />
       <NewTodoForm
-        todosState={todosState}
-        noticeSnackbarState={noticeSnackbarState}
+        todosStatus={todosStatus}
+        noticeSnackbarStatus={noticeSnackbarStatus}
       />
       <TodoList
-        todosState={todosState}
-        noticeSnackbarState={noticeSnackbarState}
+        todosStatus={todosStatus}
+        noticeSnackbarStatus={noticeSnackbarStatus}
       />
     </>
   );
