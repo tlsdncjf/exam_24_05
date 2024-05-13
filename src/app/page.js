@@ -12,13 +12,20 @@ import {
   Chip,
   Box,
   Drawer,
+  SwipeableDrawer,
   MenuList,
+  List,
+  ListItem,
+  Divider,
+  ListItemButton,
+  Modal,
 } from "@mui/material";
-import { FaBars, FaCheck, FaEllipsisH } from "react-icons/fa";
+import { FaBars, FaCheck, FaEllipsisH, FaTrash } from "react-icons/fa";
+import { FaPenToSquare } from "react-icons/fa6";
 import RootTheme from "./theme";
 import dateToStr from "./dateUtil";
 
-function useTodosState() {
+function useTodosStatus() {
   const [todos, setTodos] = React.useState([]);
   const lastTodoIdRef = React.useRef(0);
 
@@ -38,6 +45,7 @@ function useTodosState() {
     setTodos(newTodos);
   };
 
+  // modify v1
   const modifyTodo = (id, content) => {
     const newTodos = todos.map((todo) =>
       todo.id != id ? todo : { ...todo, content }
@@ -45,11 +53,45 @@ function useTodosState() {
     setTodos(newTodos);
   };
 
+  // modify v2
+  const modifyTodoByIndex = (index, newContent) => {
+    const newTodos = todos.map((todo, _index) =>
+      _index != index ? todo : { ...todo, content: newContent }
+    );
+    setTodos(newTodos);
+  };
+  // modify v2
+  const modifyTodoById = (id, newContent) => {
+    const index = findTodoIndexById(id);
+
+    if (index == -1) {
+      return null;
+    }
+
+    modifyTodoByIndex(index, newContent);
+  };
+
+  const findTodoIndexById = (id) => {
+    return todos.findIndex((todo) => todo.id == id);
+  };
+
+  const findTodoById = (id) => {
+    const index = findTodoIndexById(id);
+
+    if (index == -1) {
+      return null;
+    }
+
+    return todos[index];
+  };
+
   return {
     todos,
     addTodo,
     removeTodo,
     modifyTodo,
+    findTodoById,
+    modifyTodoById,
   };
 }
 
@@ -94,7 +136,7 @@ const NewTodoForm = ({ todosState }) => {
   );
 };
 
-const TodoListItem = ({ todo, index, openDrawer }) => {
+const TodoListItem = ({ todo, index, openDrawer, todosState }) => {
   return (
     <>
       <li key={todo.id}>
@@ -147,35 +189,168 @@ const TodoListItem = ({ todo, index, openDrawer }) => {
   );
 };
 
-const TodoList = ({ todosState }) => {
-  const [optionDrawerTodoId, setOptionDrawerTodoId] = React.useState(null);
+// 해당 todo option에 대한 drawer 열기, 닫기
+function useTodoOptionDrawerStatus() {
+  const [todoId, setTodoId] = React.useState(null);
 
-  const drawerOpened = React.useMemo(
-    () => optionDrawerTodoId !== null,
-    [optionDrawerTodoId]
-  );
+  const opened = React.useMemo(() => todoId !== null, [todoId]);
 
-  const openDrawer = (id) => setOptionDrawerTodoId(id);
-  const closeDrawer = () => setOptionDrawerTodoId(null);
+  const open = (id) => setTodoId(id);
+  const close = () => setTodoId(null);
+
+  return {
+    todoId,
+    open,
+    close,
+    opened,
+  };
+}
+
+// modal 열기, 닫기
+function useEditTodoModalStatus() {
+  const [opened, setOpened] = React.useState(false);
+
+  const open = () => {
+    setOpened(true);
+  };
+
+  const close = () => {
+    setOpened(false);
+  };
+
+  return {
+    opened,
+    open,
+    close,
+  };
+}
+
+function EditTodoModal({ status, todosState, todo }) {
+  const onSubmit = (e) => {
+    e.preventDefault();
+
+    const form = e.currentTarget;
+
+    form.content.value = form.content.value.trim();
+
+    if (form.content.value.length == 0) {
+      alert("할 일 써");
+      form.content.focus();
+      return;
+    }
+
+    // modify v1
+    todosState.modifyTodo(todo.id, form.content.value);
+    status.close();
+
+    // modify v2
+    // todosState.modifyTodoById(todo.id, form.content.value);
+  };
 
   return (
     <>
-      <Drawer anchor="bottom" open={drawerOpened} onClose={closeDrawer}>
-        <div className="tw-p-[30px] tw-flex tw-gap-x-[5px]">
-          {optionDrawerTodoId}번 todo에 대한 옵션 Drawer
-          <div>수정</div>
-          <div>삭제</div>
+      <Modal
+        open={status.opened}
+        onClose={status.close}
+        className="tw-flex tw-justify-center tw-items-center"
+      >
+        <div className="tw-bg-white tw-p-10 tw-rounded-[20px] tw-w-full tw-max-w-lg">
+          <form onSubmit={onSubmit} className="tw-flex tw-flex-col tw-gap-2">
+            <TextField
+              minRows={3}
+              maxRows={10}
+              multiline
+              name="content"
+              autoComplete="off"
+              variant="outlined"
+              label="할 일 써"
+              defaultValue={todo?.content}
+            />
+            <Button variant="contained" className="tw-font-bold" type="submit">
+              수정
+            </Button>
+          </form>
         </div>
-      </Drawer>
-      할 일 갯수 : {todosState.todos.length}
+      </Modal>
+    </>
+  );
+}
+
+function TodoOptionDrawer({ status, todosState }) {
+  const removeTodo = () => {
+    if (confirm(`${status.todoId}번 할 일을 삭제하시겠습니까?`) == false) {
+      status.close();
+      return;
+    }
+
+    todosState.removeTodo(status.todoId);
+    status.close();
+  };
+
+  const editTodoModalStatus = useEditTodoModalStatus();
+
+  const todo = todosState.findTodoById(status.todoId);
+
+  return (
+    <>
+      <EditTodoModal
+        status={editTodoModalStatus}
+        todosState={todosState}
+        todo={todo}
+      />
+      <SwipeableDrawer
+        anchor="top"
+        open={status.opened}
+        onClose={status.close}
+        onOpen={() => {}}
+      >
+        <List>
+          <ListItem className="tw-flex tw-gap-2 tw-p-[15px]">
+            <span className="tw-text-[--mui-color-primary-main]">
+              {status.todoId}번{" "}
+            </span>
+            <span>Your Todo</span>
+          </ListItem>
+          <Divider className="tw-my-[5px]" />
+          <ListItemButton
+            onClick={editTodoModalStatus.open}
+            className="tw-p-[15px_20px] tw-flex tw-gap-2 tw-items-center"
+          >
+            <span>수정</span>
+            <FaPenToSquare className="block tw-mt-[-5px]" />
+          </ListItemButton>
+          <ListItemButton
+            className="tw-p-[15px_20px] tw-flex tw-gap-2 tw-items-center"
+            onClick={removeTodo}
+          >
+            <span>삭제</span>
+            <FaTrash className="block tw-mt-[-5px]" />
+          </ListItemButton>
+        </List>
+      </SwipeableDrawer>
+    </>
+  );
+}
+
+const TodoList = ({ todosState }) => {
+  const todoOptionDrawerStatus = useTodoOptionDrawerStatus();
+
+  return (
+    <>
+      <TodoOptionDrawer
+        status={todoOptionDrawerStatus}
+        todosState={todosState}
+      />
       <nav>
+        할 일 갯수 : {todosState.todos.length}
         <ul>
           {todosState.todos.map((todo, index) => (
             <TodoListItem
               key={todo.id}
               todo={todo}
               index={index}
-              openDrawer={openDrawer}
+              openDrawer={todoOptionDrawerStatus.open}
+              todosState={todosState}
             />
           ))}
         </ul>
@@ -185,7 +360,7 @@ const TodoList = ({ todosState }) => {
 };
 
 function App() {
-  const todosState = useTodosState();
+  const todosState = useTodosStatus();
 
   React.useEffect(() => {
     todosState.addTodo("스쿼트\n런지");
